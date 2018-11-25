@@ -2,15 +2,16 @@ package com.greco.securityutils.bus;
 
 import com.google.common.primitives.Chars;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Slf4j
 @RestController
@@ -26,19 +27,27 @@ public class PwGenController {
 
     private static String TYPE_ALPHANUMERIC = "alphanumeric";
     private static String TYPE_ALPHABETIC = "alphabetic";
+    private static int DEFAULT_NUMBER_OF_PASSWORDS = 1;
 
 
     @GetMapping("/pwgen")
-    private String generatePassword(@RequestParam Optional<String> type, @RequestParam int passwordLength) throws Exception{
+    private List generatePassword(@RequestParam(required = false, defaultValue = "1") int number,@RequestParam Optional<String> type, @RequestParam int passwordLength) throws Exception{
 
         SecureRandom random = SecureRandom.getInstanceStrong();
+        List<String> passwordArray = new ArrayList();
+        IntStream.range(0, number).forEach(
+                nbr -> passwordArray.add(getPassword(random,type,passwordLength))) ;
+        return passwordArray;
+
+    }
+
+    private  String  getPassword(SecureRandom random,Optional type,int passwordLength){
+
         RandomStringGenerator generator = new RandomStringGenerator.Builder()
                 .selectFrom(getAllowedValues(type))
                 .usingRandom(random::nextInt)
                 .build();
-        String randomLetters = generator.generate(passwordLength);
-        return randomLetters;
-
+        return generator.generate(passwordLength);
     }
 
     protected char[] getAllowedValues(Optional<String> passwordType){

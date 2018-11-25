@@ -16,7 +16,7 @@ import java.util.Enumeration;
 public class SecurityUtilsApplication {
 
     public static void main(String[] args) {
-
+        System.setProperty("spring.jackson.serialization.INDENT_OUTPUT", "true");
         SpringApplication.run(SecurityUtilsApplication.class, args);
     }
 
