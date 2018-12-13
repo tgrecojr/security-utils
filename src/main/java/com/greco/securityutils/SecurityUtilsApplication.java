@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
 import java.security.Provider;
@@ -13,10 +16,9 @@ import java.util.Enumeration;
 
 @Slf4j
 @SpringBootApplication
-public class SecurityUtilsApplication {
+public class SecurityUtilsApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        System.setProperty("spring.jackson.serialization.INDENT_OUTPUT", "true");
         SpringApplication.run(SecurityUtilsApplication.class, args);
     }
 

@@ -1,11 +1,14 @@
 package com.greco.securityutils.bus;
 
 import com.google.common.primitives.Chars;
+import com.greco.securityutils.model.Password;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import sun.misc.Request;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -31,23 +34,26 @@ public class PwGenController {
 
 
     @GetMapping("/pwgen")
-    private List generatePassword(@RequestParam(required = false, defaultValue = "1") int number,@RequestParam Optional<String> type, @RequestParam int passwordLength) throws Exception{
-
+    private List<Password> generatePassword(@RequestParam(required = false, defaultValue = "1") int number, @RequestParam Optional<String> type, @RequestParam(required = false, defaultValue = "20") int passwordLength) throws Exception{
         SecureRandom random = SecureRandom.getInstanceStrong();
-        List<String> passwordArray = new ArrayList();
+        List<Password> passwordArray = new ArrayList();
         IntStream.range(0, number).forEach(
                 nbr -> passwordArray.add(getPassword(random,type,passwordLength))) ;
         return passwordArray;
 
     }
 
-    private  String  getPassword(SecureRandom random,Optional type,int passwordLength){
-
+    private  Password  getPassword(SecureRandom random,Optional type,int passwordLength){
         RandomStringGenerator generator = new RandomStringGenerator.Builder()
                 .selectFrom(getAllowedValues(type))
                 .usingRandom(random::nextInt)
                 .build();
-        return generator.generate(passwordLength);
+        return new Password(generator.generate(passwordLength));
+    }
+
+    @GetMapping("/sha1")
+    private String getSHA1ForPassword(@RequestParam(required=true) String password){
+        return DigestUtils.sha1Hex(password);
     }
 
     protected char[] getAllowedValues(Optional<String> passwordType){
