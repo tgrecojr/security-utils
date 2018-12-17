@@ -1,10 +1,14 @@
 package com.greco.securityutils.bus;
 
 import com.google.common.primitives.Chars;
+import com.greco.securityutils.data.PasswordDAO;
+
 import com.greco.securityutils.model.Password;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.text.RandomStringGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +36,9 @@ public class PwGenController {
     private static String TYPE_ALPHABETIC = "alphabetic";
     private static int DEFAULT_NUMBER_OF_PASSWORDS = 1;
 
+    @Autowired
+    PasswordDAO passwordDAO;
+
 
     @GetMapping("/pwgen")
     private List<Password> generatePassword(@RequestParam(required = false, defaultValue = "1") int number, @RequestParam Optional<String> type, @RequestParam(required = false, defaultValue = "20") int passwordLength) throws Exception{
@@ -48,6 +55,14 @@ public class PwGenController {
                 .selectFrom(getAllowedValues(type))
                 .usingRandom(random::nextInt)
                 .build();
+        Password p = new Password(generator.generate(passwordLength));
+        try{
+            String pwHash = passwordDAO.getCountForPasswordHash(p.getSha1Hash());
+            p.setOwned(true);
+        }catch(EmptyResultDataAccessException e){
+            p.setOwned(false);
+        }
+
         return new Password(generator.generate(passwordLength));
     }
 
