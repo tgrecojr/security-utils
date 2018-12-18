@@ -50,6 +50,20 @@ public class PwGenController {
 
     }
 
+    @GetMapping("/pwcheck")
+    private Password checkPassword(@RequestParam(required = true) String password) throws Exception{
+        Password p = new Password(password);
+        try{
+            String pwHash = passwordDAO.getCountForPasswordHash(p.getSha1Hash());
+            p.setOwned(true);
+        }catch(EmptyResultDataAccessException e){
+            p.setOwned(false);
+        }
+        return p;
+
+    }
+
+
     private  Password  getPassword(SecureRandom random,Optional type,int passwordLength){
         RandomStringGenerator generator = new RandomStringGenerator.Builder()
                 .selectFrom(getAllowedValues(type))
